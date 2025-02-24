@@ -7,6 +7,7 @@ import Modal from "react-modal";
 import { useNavigate } from "react-router-dom";
 import axiosInstance from "../../utils/axiosInstance";
 import Toast from "../../components/toastMessage/Toast";
+import EmptyCard from "../../components/empty/EmptyCard";
 
 function Home() {
   const [openEditModal, setOpenAddEditModal] = useState({
@@ -24,6 +25,8 @@ function Home() {
   const [allNotes, setAllNotes] = useState([]);
   const [userInfo, setUserInfo] = useState(null);
   const navigate = useNavigate();
+
+  const [isSearch, setIsSearch] = useState(false);
 
   const handleEdit = (notedetails) => {
     // this data -> noteData
@@ -72,6 +75,69 @@ function Home() {
     }
   };
 
+  // Delete Note API
+  const deleteNote = async (data) => {
+    const noteId = data._id;
+
+    try {
+      const response = await axiosInstance.delete("/delete-note/" + noteId);
+
+      if (response.data && !response.data.error) {
+        getAllNotes();
+        onClose();
+      }
+    } catch (error) {
+      if (
+        error.response &&
+        error.response.data &&
+        error.response.data.message
+      ) {
+        console.log("An error occured");
+      }
+    }
+  };
+
+  // Search API call
+  const onSearchNote = async (query) => {
+    try {
+      const response = await axiosInstance.get("/search-notes/", {
+        params: { query },
+      });
+
+      if (response.data && response.data.notes) {
+        setIsSearch(true);
+        setAllNotes(response.data.notes);
+      }
+    } catch (error) {
+      console.log("search error::", error);
+    }
+  };
+
+  // To clear search results
+  const handleClearSearch = () => {
+    setIsSearch(false);
+    getAllNotes();
+  };
+
+  const updateisPinned = async (noteData) => {
+    const noteId = noteData._id;
+
+    try {
+      const response = await axiosInstance.put(
+        "/update-note-pinned/" + noteId,
+        {
+          isPinned: !noteData.isPinned,
+        }
+      );
+
+      if (response.data && response.data.note) {
+        getAllNotes();
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   useEffect(() => {
     getAllNotes();
     getUserInfo();
@@ -79,26 +145,35 @@ function Home() {
 
   return (
     <>
-      <Navbar userInfo={userInfo} />
+      {/* this userInfo needed for personalInfo */}
+      <Navbar
+        userInfo={userInfo}
+        onSearchNote={onSearchNote}
+        handleClearSearch={handleClearSearch}
+      />
 
       <div className="container mx-auto">
-        <div className="grid grid-cols-3 gap-4 m-8">
-          {/* rendering all the notes of the user */}
+        {allNotes.length > 0 ? (
+          <div className="grid grid-cols-3 gap-4 m-8">
+            {/* rendering all the notes of the user */}
 
-          {allNotes.map((item, index) => (
-            <NoteCard
-              key={item._id}
-              title={item.title}
-              content={item.content}
-              date={item.createdOn}
-              tags={item.tags}
-              isPinned={item.isPinned}
-              onEdit={() => handleEdit(item)}
-              onDelete={() => {}}
-              onPinNote={() => {}}
-            />
-          ))}
-        </div>
+            {allNotes.map((item, index) => (
+              <NoteCard
+                key={item._id}
+                title={item.title}
+                content={item.content}
+                date={item.createdOn}
+                tags={item.tags}
+                isPinned={item.isPinned}
+                onEdit={() => handleEdit(item)}
+                onDelete={() => deleteNote(item)}
+                onPinNote={() => updateisPinned(item)}
+              />
+            ))}
+          </div>
+        ) : (
+          <EmptyCard />
+        )}
       </div>
 
       {/* ( + ) button */}

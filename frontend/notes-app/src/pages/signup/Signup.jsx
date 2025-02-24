@@ -20,7 +20,7 @@ function Signup() {
       return;
     }
     if (!validateEmail(email)) {
-      setError("Email is required");
+      setError("Email is required in correct format");
       return;
     }
     if (!password) {
@@ -41,6 +41,7 @@ function Signup() {
         setError(response.data.message);
         return;
       }
+
       if (response.data && response.data.accessToken) {
         localStorage.setItem("token", response.data.accessToken);
         navigate("/dashboard");
