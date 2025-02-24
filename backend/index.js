@@ -1,10 +1,13 @@
-// Giving some trouble when mongodb connection restart again and again
+// Giving some trouble when mongodb connection (restart again and again)
 require("dotenv").config();
 
 // DB
 const config = require("./config.json");
 const mongoose = require("mongoose");
-mongoose.connect(config.connectionString);
+mongoose
+  .connect(config.connectionString)
+  .then(() => console.log("MongoDB connected"))
+  .catch((err) => console.error("MongoDB connection error::", err));
 const User = require("./models/user.model");
 const Note = require("./models/note.model");
 
@@ -28,6 +31,7 @@ app.get("/", (req, res) => {
 // Create Account
 app.post("/create-account", async (req, res) => {
   const { fullName, email, password } = req.body;
+
   if (!fullName) {
     return res
       .status(400)

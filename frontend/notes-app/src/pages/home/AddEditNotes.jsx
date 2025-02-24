@@ -10,7 +10,7 @@ function AddEditNotes({ noteData, type, onClose, getAllNotes }) {
 
   const [error, setError] = useState(null);
 
-  // Add Note
+  // Add Note API
   const addNewNote = async () => {
     try {
       const response = await axiosInstance.post("/add-note", {
@@ -34,7 +34,7 @@ function AddEditNotes({ noteData, type, onClose, getAllNotes }) {
     }
   };
 
-  // Edit Note
+  // Edit Note API
   const editNote = async () => {
     const noteId = noteData._id;
 
@@ -45,11 +45,13 @@ function AddEditNotes({ noteData, type, onClose, getAllNotes }) {
         tags,
       });
 
+      // if we are getting note as res then only proceed further
       if (response.data && response.data.note) {
         getAllNotes();
         onClose();
       }
     } catch (error) {
+      // handles the error that we wrote in backend
       if (
         error.response &&
         error.response.data &&
@@ -60,6 +62,7 @@ function AddEditNotes({ noteData, type, onClose, getAllNotes }) {
     }
   };
 
+  // when add or update btn clicked
   const handleAddNote = () => {
     if (!title) {
       setError("Please enter the title");

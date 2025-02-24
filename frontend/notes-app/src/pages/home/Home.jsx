@@ -59,7 +59,7 @@ function Home() {
     }
   };
 
-  // Get All Notes (in inspect->Network)
+  // Get All Notes (in inspect -> Network)
   const getAllNotes = async () => {
     try {
       const response = await axiosInstance.get("/get-all-notes/");
@@ -83,6 +83,8 @@ function Home() {
 
       <div className="container mx-auto">
         <div className="grid grid-cols-3 gap-4 m-8">
+          {/* rendering all the notes of the user */}
+
           {allNotes.map((item, index) => (
             <NoteCard
               key={item._id}
